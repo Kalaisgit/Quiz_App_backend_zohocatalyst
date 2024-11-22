@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import cors from "cors";
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
@@ -27,19 +28,20 @@ const supabase = createSupabaseClient(
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins (for testing)
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+// Use CORS middleware to allow requests from your frontend
+const corsOptions = {
+  origin: "https://onlinequizapphosting.web.app", // Frontend origin
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"], // Headers you're using
+  credentials: true, // Include credentials if needed
+};
 
-  if (req.method === "OPTIONS") {
-    return res.status(204).send(); // Respond to preflight request
-  }
+app.use(cors(corsOptions));
 
-  next();
-});
-app.get(``, async (req, res) => {
+// Handle preflight (OPTIONS) requests
+app.options("*", cors(corsOptions));
+
+app.get(`/`, async (req, res) => {
   console.log("Welcome page");
 
   res.json("Hello");
